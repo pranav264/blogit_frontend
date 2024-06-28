@@ -1,6 +1,6 @@
 import { Avatar, Button, CircularProgress, Input } from "@chakra-ui/react";
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import JoditEditor from "jodit-react";
 import { Schema } from "@sanity/schema";
 import { htmlToBlocks, getBlockContentFeatures } from "@sanity/block-tools";
@@ -39,10 +39,12 @@ const blockContentType = defaultSchema
 
 const WriteABlog = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingOne, setIsLoadingOne] = useState(false);
 
   const editor_ = useRef(null);
   const [content, setContent] = useState("Start Writing");
@@ -111,7 +113,7 @@ const WriteABlog = () => {
 
   const createDocument = async () => {
     const blocks = htmlToBlocks(content, blockContentType);
-
+    setIsLoadingOne(true);
     if (!location.state.edit) {
       const doc = {
         _type: "textEditor",
@@ -161,6 +163,9 @@ const WriteABlog = () => {
 
       customAlert(responseOne.data);
     }
+
+    setIsLoadingOne(false);
+    navigate("/documents", { state: { username: location?.state?.username } });
   };
 
   useEffect(() => {
@@ -199,8 +204,8 @@ const WriteABlog = () => {
               onBlur={handleUpdate}
             />
           </div>
-          <div className="flex justify-center items-center mt-10">
-            <Button className="poppins" onClick={createDocument}>
+          <div className="flex justify-center items-center mt-10 mb-10">
+            <Button className="poppins" onClick={createDocument} isLoading={isLoadingOne}>
               {!location.state.edit ? "Post" : "Update"}
             </Button>
           </div>
